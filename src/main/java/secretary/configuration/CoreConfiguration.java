@@ -8,8 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import secretary.core.domain.FileThing;
+import secretary.core.domain.TextThing;
+import secretary.core.domain.ToDoThing;
 import secretary.core.services.ActivityService;
 import secretary.core.services.FileService;
 import secretary.core.services.MongoDbFileService;
@@ -30,13 +34,22 @@ public class CoreConfiguration{
 	}
 	
 	@Bean
-	public MappingJackson2HttpMessageConverter createMappingJackson2HttpMessageConverter(ObjectMapper mapper){
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+	public ObjectMapper createObjectMapper(){
+		ObjectMapper objectMapper = new ObjectMapper();
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		mapper.setDateFormat(dateFormat);
+		objectMapper.setDateFormat(dateFormat);
 		
-		converter.setObjectMapper(mapper);
+		objectMapper.setSerializationInclusion(Include.NON_NULL);
+		objectMapper.registerSubtypes(ToDoThing.class, FileThing.class, TextThing.class);
+		return objectMapper;
+	}
+	
+	@Bean
+	public MappingJackson2HttpMessageConverter createMappingJackson2HttpMessageConverter(){
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+		
+		converter.setObjectMapper(createObjectMapper());
 		
 		return converter;
 	}
