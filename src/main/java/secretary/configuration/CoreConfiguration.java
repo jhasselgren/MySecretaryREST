@@ -8,16 +8,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.gridfs.GridFsOperations;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import secretary.core.domain.FileThing;
-import secretary.core.domain.TextThing;
-import secretary.core.domain.ToDoThing;
 import secretary.core.services.ActivityService;
 import secretary.core.services.FileService;
 import secretary.core.services.MongoDbFileService;
 import secretary.core.services.StubActivityService;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class CoreConfiguration{
@@ -41,7 +38,7 @@ public class CoreConfiguration{
 		objectMapper.setDateFormat(dateFormat);
 		
 		objectMapper.setSerializationInclusion(Include.NON_NULL);
-		objectMapper.registerSubtypes(ToDoThing.class, FileThing.class, TextThing.class);
+		//objectMapper.registerSubtypes(ToDoThing.class, FileThing.class, TextThing.class);
 		return objectMapper;
 	}
 	
