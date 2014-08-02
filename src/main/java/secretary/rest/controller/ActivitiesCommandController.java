@@ -18,7 +18,10 @@ import secretary.core.domain.Activity;
 import secretary.core.domain.TextThing;
 import secretary.core.domain.Thing;
 import secretary.core.domain.ThingType;
+import secretary.core.events.DeletedEvent;
+import secretary.core.events.UpdatedEvent;
 import secretary.core.services.ActivityService;
+import secretary.core.services.FileService;
 
 @Controller
 @RequestMapping("/activity")
@@ -27,7 +30,30 @@ public class ActivitiesCommandController {
 	@Autowired
 	ActivityService activityService;
 	
+	@Autowired
+	FileService fileService;
+	
 	private final static Logger logger = LoggerFactory.getLogger(ActivitiesCommandController.class);
+	
+	@RequestMapping(method=RequestMethod.POST)
+	public ResponseEntity<Activity> createActivity(@RequestBody Activity activity){
+		Activity newActivity = activityService.CreateActivity(activity).getEntity();
+		
+		return new ResponseEntity<Activity>(newActivity, HttpStatus.CREATED);
+		
+	}
+	
+	@RequestMapping(method=RequestMethod.PUT)
+	public ResponseEntity<Activity> updateActivity(@RequestBody Activity activity){
+		UpdatedEvent<Activity> event = activityService.updateActivity(activity);
+		
+		if(!event.isEntityFound()){
+			return new ResponseEntity<Activity>(HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity<Activity>(event.getEntity(), HttpStatus.OK);
+		
+	}
 	
 	@RequestMapping(value="/{activityId}/{thingId}", method=RequestMethod.POST)
 	public ResponseEntity<Activity> addSubThing(@PathVariable String activityId, @PathVariable String thingId, @RequestBody Thing newSubThing){
@@ -50,8 +76,21 @@ public class ActivitiesCommandController {
 		activity = activityService.updateActivity(activity).getEntity();
 		
 		return new ResponseEntity<Activity>(activity, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
+	public ResponseEntity<Activity> deleteActivity(@PathVariable String id){
+		
+		DeletedEvent<Activity> event = activityService.deleteActivity(id);
+		
+		if(!event.isEntityFound()){
+			return new ResponseEntity<Activity>(HttpStatus.NOT_FOUND);
+		}
+		
+		return new ResponseEntity<Activity>(event.getEntity(), HttpStatus.OK);
 		
 	}
+	
 	
 	@ExceptionHandler
 	@ResponseStatus(HttpStatus.BAD_REQUEST)

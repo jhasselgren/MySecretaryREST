@@ -1,5 +1,7 @@
 package secretary.rest.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import secretary.core.domain.Activity;
+import secretary.core.events.GetManyEvent;
 import secretary.core.events.GetOneEvent;
 import secretary.core.services.ActivityService;
 
@@ -35,6 +38,16 @@ public class ActivitiesQueryController {
 		}
 		
 		return new ResponseEntity<Activity>(event.getEntity(), HttpStatus.OK);
+		
+	}
+	
+	@RequestMapping(value="/all", method=RequestMethod.GET)
+	public ResponseEntity<List<Activity>> getAll(){
+		GetManyEvent<Activity> event = activityService.getAllActivities();
+		
+		
+		
+		return new ResponseEntity<List<Activity>>(event.getEntities(), HttpStatus.OK);
 		
 	}
 	
