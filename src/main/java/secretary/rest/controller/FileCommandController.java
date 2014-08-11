@@ -20,7 +20,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import secretary.core.domain.Activity;
 import secretary.core.domain.FileThing;
+import secretary.core.domain.TextThing;
+import secretary.core.domain.Thing;
+import secretary.core.services.ActivityService;
 import secretary.core.services.FileService;
 
 @Controller
@@ -29,6 +33,9 @@ public class FileCommandController {
 	
 	@Autowired
 	FileService fileService;
+	
+	@Autowired
+	ActivityService activityService;
 	
 	private final static Logger logger = LoggerFactory.getLogger(FileCommandController.class);
 	
@@ -84,25 +91,65 @@ public class FileCommandController {
     }
     
     
-    @RequestMapping(value="/download/{fileId}")
-    public HttpEntity<byte[]> getFile(@PathVariable String fileId) throws Exception{
-    	try{
-    			ByteArrayOutputStream outputFile = new ByteArrayOutputStream();
-    			fileService.fetchFile(outputFile, fileId);
-    			
-    			HttpHeaders httpHeaders = new HttpHeaders();
-    			
-    			
-    			httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-    			httpHeaders.add("Content-Disposition", "attachment; filename=\"test\"");
-    			
-                return new ResponseEntity<byte[]>(outputFile.toByteArray(), httpHeaders, HttpStatus.OK);
-
+    @RequestMapping(value="/download/{activityId}/{fileId}")
+    public HttpEntity<byte[]> getFile(@PathVariable String activityId, @PathVariable String fileId) throws Exception{	
+		Activity activity = activityService.getActivity(activityId).getEntity();
+		
+		FileThing fileThing = null;
+		
+		for (Thing thing : activity.getThings()) {
+			
+			if(thing instanceof FileThing){
+				FileThing tempFileThing = (FileThing) thing;
+				
+				if(tempFileThing.getFileId().equals(fileId)){
+					fileThing = tempFileThing;
+				}
+			}
+			else if(thing instanceof TextThing){
+				TextThing textThing = (TextThing) thing;
+				
+				for (Thing subthing : textThing.getThings()) {
+					if(subthing instanceof FileThing){
+						FileThing tempFileThing = (FileThing) thing;
+						
+						if(tempFileThing.getFileId().equals(fileId)){
+							fileThing = tempFileThing;
+							break;
+						}
+					}
+				}
+			}
+			
+			if(fileThing != null){
+				break;
+			}
+		}
+	
+		ByteArrayOutputStream outputFile = new ByteArrayOutputStream();
+		try{
+				fileService.fetchFile(outputFile, fileThing.getFileId());
+				
+				HttpHeaders httpHeaders = new HttpHeaders();
+				
+				MediaType mediaType =  MediaType.valueOf(fileThing.getFileType());
+				
+				httpHeaders.setContentType(mediaType);
+				httpHeaders.add("Content-Disposition", "attachment; filename=\"" +fileThing.getName() + "\"");
+				
+	            return new ResponseEntity<byte[]>(outputFile.toByteArray(), httpHeaders, HttpStatus.OK);
+	
 	    }catch(Exception e){
 	        logger.debug(e.getMessage());
 	        e.printStackTrace();
 	        throw e;
-	    } 	
+	    }
+		finally{
+			if(outputFile != null){
+				outputFile.close();
+			}
+		}
+	
     }
     
 	

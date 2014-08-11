@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import secretary.core.domain.Activity;
+import secretary.core.domain.FileThing;
 import secretary.core.domain.TextThing;
 import secretary.core.domain.Thing;
 import secretary.core.domain.ThingType;
@@ -91,6 +92,53 @@ public class ActivitiesCommandController {
 		
 	}
 	
+	@RequestMapping(value="{activityId}/delete/thing", method=RequestMethod.PUT)
+	public ResponseEntity<Activity> deleteThing(@PathVariable String activityId, @RequestBody Thing deleteThing){
+		
+		Activity activity = activityService.getActivity(activityId).getEntity();
+	
+		int index = -1;
+		
+		for (Thing thing : activity.getThings()) {
+			if(thing.equals(deleteThing)){
+				if(thing instanceof FileThing){
+					FileThing fileThing = (FileThing) thing;
+					fileService.deleteFile(fileThing.getFileId());
+				}
+				else if (thing instanceof FileThing){
+					//Måste ta bort filer i subThings
+				}
+				index = activity.getThings().indexOf(thing);
+				break;
+			}
+			else if(thing instanceof TextThing){
+				
+				TextThing textThing = (TextThing) thing;
+				
+				int subIndex = -1;
+				
+				for (Thing subthing : textThing.getThings()) {
+					if(subthing.equals(deleteThing)){
+						subIndex = textThing.getThings().indexOf(subthing);
+						break;
+					}
+				}
+				
+				if(subIndex > -1){
+					textThing.getThings().remove(subIndex);
+					break;
+				}
+			}
+		}
+		
+		if(index > -1){
+			activity.getThings().remove(index);
+		}
+		
+		Activity updatedActivity = activityService.updateActivity(activity).getEntity();
+		
+		return new ResponseEntity<>(updatedActivity, HttpStatus.OK);
+	}
 	
 	@ExceptionHandler
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
