@@ -13,8 +13,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 import secretary.core.services.ActivityService;
 import secretary.core.services.FileService;
+import secretary.core.services.MongoDbActivityServer;
 import secretary.core.services.MongoDbFileService;
-import secretary.core.services.StubActivityService;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +24,8 @@ public class CoreConfiguration{
 
 	@Bean
 	public ActivityService creatActivityService(){
-		return new StubActivityService();
+//		return new StubActivityService();
+		return new MongoDbActivityServer();
 	}
 	
 	@Bean
