@@ -105,8 +105,15 @@ public class ActivitiesCommandController {
 					FileThing fileThing = (FileThing) thing;
 					fileService.deleteFile(fileThing.getFileId());
 				}
-				else if (thing instanceof FileThing){
+				else if (thing instanceof TextThing){
 					//Måste ta bort filer i subThings
+					TextThing textThing = (TextThing) thing;
+					for (Thing subthing : textThing.getThings()) {
+						if(subthing instanceof FileThing){
+							FileThing fileThing = (FileThing) thing;
+							fileService.deleteFile(fileThing.getFileId());
+						}
+					}
 				}
 				index = activity.getThings().indexOf(thing);
 				break;

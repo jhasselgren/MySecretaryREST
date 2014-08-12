@@ -111,7 +111,7 @@ public class FileCommandController {
 				
 				for (Thing subthing : textThing.getThings()) {
 					if(subthing instanceof FileThing){
-						FileThing tempFileThing = (FileThing) thing;
+						FileThing tempFileThing = (FileThing) subthing;
 						
 						if(tempFileThing.getFileId().equals(fileId)){
 							fileThing = tempFileThing;
