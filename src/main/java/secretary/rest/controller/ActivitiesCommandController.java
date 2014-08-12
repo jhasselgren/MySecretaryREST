@@ -110,7 +110,7 @@ public class ActivitiesCommandController {
 					TextThing textThing = (TextThing) thing;
 					for (Thing subthing : textThing.getThings()) {
 						if(subthing instanceof FileThing){
-							FileThing fileThing = (FileThing) thing;
+							FileThing fileThing = (FileThing) subthing;
 							fileService.deleteFile(fileThing.getFileId());
 						}
 					}
