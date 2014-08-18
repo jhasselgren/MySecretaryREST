@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
-public class CoreConfiguration{
+public class CoreConfiguration {
 
 	@Bean
 	public ActivityService creatActivityService(){
@@ -62,5 +62,7 @@ public class CoreConfiguration{
         factory.setMaxRequestSize(-1);
         return factory.createMultipartConfig();
     }
+	
+	
 	
 }
